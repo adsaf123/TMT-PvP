@@ -1,6 +1,15 @@
 // ************ Big Feature related ************
 
 function respecBuyables(layer) {
+	sendDataToServer({
+		type: SERVERINFO.PLAYERDOSOMETHING,
+		what: {
+			name: "respecBuyables",
+			layer: layer,
+			id: undefined
+		}
+	})
+
 	if (!layers[layer].buyables) return
 	if (!layers[layer].buyables.respec) return
 	if (!player[layer].noRespecConfirm && !confirm(tmp[layer].buyables.respecMessage || "Are you sure you want to respec? This will force you to do a \"" + (tmp[layer].name ? tmp[layer].name : layer) + "\" reset as well!")) return
@@ -11,10 +20,10 @@ function respecBuyables(layer) {
 
 function canAffordUpgrade(layer, id) {
 	let upg = tmp[layer].upgrades[id]
-	if(tmp[layer].deactivated) return false
+	if (tmp[layer].deactivated) return false
 	if (tmp[layer].upgrades[id].canAfford === false) return false
 	let cost = tmp[layer].upgrades[id].cost
-	if (cost !== undefined) 
+	if (cost !== undefined)
 		return canAffordPurchase(layer, upg, cost)
 
 	return true
@@ -51,6 +60,15 @@ function buyUpgrade(layer, id) {
 }
 
 function buyUpg(layer, id) {
+	sendDataToServer({
+		type: SERVERINFO.PLAYERDOSOMETHING,
+		what: {
+			name: "buyUpg",
+			layer: layer,
+			id: id
+		}
+	})
+
 	if (!tmp[layer].upgrades || !tmp[layer].upgrades[id]) return
 	let upg = tmp[layer].upgrades[id]
 	if (!player[layer].unlocked || player[layer].deactivated) return
@@ -91,6 +109,15 @@ function buyUpg(layer, id) {
 }
 
 function buyMaxBuyable(layer, id) {
+	sendDataToServer({
+		type: SERVERINFO.PLAYERDOSOMETHING,
+		what: {
+			name: "buyMaxBuyable",
+			layer: layer,
+			id: id
+		}
+	})
+
 	if (!player[layer].unlocked) return
 	if (!tmp[layer].buyables[id].unlocked) return
 	if (!tmp[layer].buyables[id].canBuy) return
@@ -101,6 +128,16 @@ function buyMaxBuyable(layer, id) {
 }
 
 function buyBuyable(layer, id) {
+	if (player.navTab == "tree-tab")
+		sendDataToServer({
+			type: SERVERINFO.PLAYERDOSOMETHING,
+			what: {
+				name: "buyBuyable",
+				layer: layer,
+				id: id
+			}
+		})
+
 	if (!player[layer].unlocked) return
 	if (!tmp[layer].buyables[id].unlocked) return
 	if (!tmp[layer].buyables[id].canBuy) return
@@ -110,6 +147,16 @@ function buyBuyable(layer, id) {
 }
 
 function clickClickable(layer, id) {
+	if (player.navTab == "tree-tab")
+		sendDataToServer({
+			type: SERVERINFO.PLAYERDOSOMETHING,
+			what: {
+				name: "clickClickable",
+				layer: layer,
+				id: id
+			}
+		})
+
 	if (!player[layer].unlocked || tmp[layer].deactivated) return
 	if (!tmp[layer].clickables[id].unlocked) return
 	if (!tmp[layer].clickables[id].canClick) return
@@ -119,7 +166,16 @@ function clickClickable(layer, id) {
 }
 
 function clickGrid(layer, id) {
-	if (!player[layer].unlocked  || tmp[layer].deactivated) return
+	sendDataToServer({
+		type: SERVERINFO.PLAYERDOSOMETHING,
+		what: {
+			name: "clickGrid",
+			layer: layer,
+			id: id
+		}
+	})
+
+	if (!player[layer].unlocked || tmp[layer].deactivated) return
 	if (!run(layers[layer].grid.getUnlocked, layers[layer].grid, id)) return
 	if (!gridRun(layer, 'getCanClick', player[layer].grid[id], id)) return
 
@@ -144,7 +200,7 @@ var onTreeTab = true
 
 function showTab(name, prev) {
 	if (LAYERS.includes(name) && !layerunlocked(name)) return
-	if (player.tab !== name) clearParticles(function(p) {return p.layer === player.tab})
+	if (player.tab !== name) clearParticles(function (p) { return p.layer === player.tab })
 	if (tmp[name] && player.tab === name && isPlainObject(tmp[name].tabFormat)) {
 		player.subtabs[name].mainTabs = Object.keys(layers[name].tabFormat)[0]
 	}
@@ -160,11 +216,11 @@ function showTab(name, prev) {
 function showNavTab(name, prev) {
 	console.log(prev)
 	if (LAYERS.includes(name) && !layerunlocked(name)) return
-	if (player.navTab !== name) clearParticles(function(p) {return p.layer === player.navTab})
+	if (player.navTab !== name) clearParticles(function (p) { return p.layer === player.navTab })
 	if (tmp[name] && tmp[name].previousTab !== undefined) prev = tmp[name].previousTab
 	var toTreeTab = name == "tree-tab"
 	console.log(name + prev)
-	if (name!== "none" && prev && !tmp[prev]?.leftTab == !tmp[name]?.leftTab) player[name].prevTab = prev
+	if (name !== "none" && prev && !tmp[prev]?.leftTab == !tmp[name]?.leftTab) player[name].prevTab = prev
 	else if (player[name])
 		player[name].prevTab = ""
 	player.navTab = name
@@ -188,21 +244,21 @@ function layOver(obj1, obj2) {
 	for (let x in obj2) {
 		if (obj2[x] instanceof Decimal) obj1[x] = new Decimal(obj2[x])
 		else if (obj2[x] instanceof Object) layOver(obj1[x], obj2[x]);
-		else obj1[x] = obj2[x];
+		else obj1[x] = obj2[x]
 	}
 }
 
 function prestigeNotify(layer) {
 	if (layers[layer].prestigeNotify) return layers[layer].prestigeNotify()
-	
+
 	if (isPlainObject(tmp[layer].tabFormat)) {
-		for (subtab in tmp[layer].tabFormat){
+		for (subtab in tmp[layer].tabFormat) {
 			if (subtabResetNotify(layer, 'mainTabs', subtab))
 				return true
 		}
 	}
 	for (family in tmp[layer].microtabs) {
-		for (subtab in tmp[layer].microtabs[family]){
+		for (subtab in tmp[layer].microtabs[family]) {
 			if (subtabResetNotify(layer, family, subtab))
 				return true
 		}
@@ -219,12 +275,12 @@ function notifyLayer(name) {
 }
 
 function subtabShouldNotify(layer, family, id) {
-    let subtab = {}
-    if (family == "mainTabs") subtab = tmp[layer].tabFormat[id]
-    else subtab = tmp[layer].microtabs[family][id]
+	let subtab = {}
+	if (family == "mainTabs") subtab = tmp[layer].tabFormat[id]
+	else subtab = tmp[layer].microtabs[family][id]
 	if (!subtab.unlocked) return false
-    if (subtab.embedLayer) return tmp[subtab.embedLayer].notify
-    else return subtab.shouldNotify
+	if (subtab.embedLayer) return tmp[subtab.embedLayer].notify
+	else return subtab.shouldNotify
 }
 
 function subtabResetNotify(layer, family, id) {
@@ -345,11 +401,11 @@ document.title = modInfo.name
 // Converts a string value to whatever it's supposed to be
 function toValue(value, oldValue) {
 	if (oldValue instanceof Decimal) {
-		value = new Decimal (value)
+		value = new Decimal(value)
 		if (checkDecimalNaN(value)) return decimalZero
 		return value
 	}
-	if (!isNaN(oldValue)) 
+	if (!isNaN(oldValue))
 		return parseFloat(value) || 0
 	return value
 }
@@ -409,4 +465,26 @@ function gridRun(layer, func, data, id) {
 	}
 	else
 		return layers[layer].grid[func];
+}
+
+function getImprovements(layer, id) {
+	if (!unl(layer)) return new Decimal(0);
+	return tmp[layer].impr[id].unlocked?(tmp[layer].impr.amount.sub(tmp[layer].impr[id].num).div(tmp[layer].impr.activeRows*tmp[layer].impr.activeCols).plus(1).floor().max(0)):new Decimal(0);
+}
+
+function getNextImpr(layer, id) {
+	return layers[layer].impr.nextAt(id);
+}
+
+function improvementEffect(layer, id) {
+	return tmp[layer].impr[id].effect
+}
+
+function reverse_softcap(a, b) {
+  return b
+}
+
+function unl(layer) {
+	if (Array.isArray(tmp.ma.canBeMastered)) if (player.ma.selectionActive&&tmp[layer].row<6&&!tmp.ma.canBeMastered.includes(layer)) return false;
+	return player[layer].unlocked;
 }

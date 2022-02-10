@@ -1,64 +1,42 @@
+import Decimal from "break_eternity.js";
+import { decimalZero } from "../technical/layerSupport.js";
+
 // ************ Save stuff ************
-function save(force) {
+export function save(force) {
 	NaNcheck(player)
 	if (NaNalert && !force) return
 	localStorage.setItem(modInfo.id, btoa(unescape(encodeURIComponent(JSON.stringify(player)))));
-	localStorage.setItem(modInfo.id+"_options", btoa(unescape(encodeURIComponent(JSON.stringify(options)))));
+	localStorage.setItem(modInfo.id + "_options", btoa(unescape(encodeURIComponent(JSON.stringify(options)))));
 
 }
-function startPlayerBase() {
+export function startPlayerBase() {
 	return {
-		tab: layoutInfo.startTab,
-		navTab: (layoutInfo.showTree ? layoutInfo.startNavTab : "none"),
 		time: Date.now(),
 		notify: {},
-		versionType: modInfo.id,
-		version: VERSION.num,
-		beta: VERSION.beta,
 		timePlayed: 0,
 		keepGoing: false,
 		hasNaN: false,
 
-		points: modInfo.initialStartPoints,
-		subtabs: {},
-		lastSafeTab: (readData(layoutInfo.showTree) ? "none" : layoutInfo.startTab)
+		points: new Decimal(0)
 	};
 }
-function getStartPlayer() {
-	playerdata = startPlayerBase();
+export function getStartPlayer() {
+	var playerdata = startPlayerBase();
 
-	if (addedPlayerData) {
+	if (global.hasOwnProperty("addedPlayerData")) {
 		extradata = addedPlayerData();
-		for (thing in extradata)
+		for (let thing in extradata)
 			playerdata[thing] = extradata[thing];
 	}
 
 	playerdata.infoboxes = {};
-	for (layer in layers) {
+	for (let layer in layers) {
 		playerdata[layer] = getStartLayerData(layer);
-
-		if (layers[layer].tabFormat && !Array.isArray(layers[layer].tabFormat)) {
-			playerdata.subtabs[layer] = {};
-			playerdata.subtabs[layer].mainTabs = Object.keys(layers[layer].tabFormat)[0];
-		}
-		if (layers[layer].microtabs) {
-			if (playerdata.subtabs[layer] == undefined)
-				playerdata.subtabs[layer] = {};
-			for (item in layers[layer].microtabs)
-				playerdata.subtabs[layer][item] = Object.keys(layers[layer].microtabs[item])[0];
-		}
-		if (layers[layer].infoboxes) {
-			if (playerdata.infoboxes[layer] == undefined)
-				playerdata.infoboxes[layer] = {};
-			for (item in layers[layer].infoboxes)
-				playerdata.infoboxes[layer][item] = false;
-		}
-
 	}
 	return playerdata;
 }
-function getStartLayerData(layer) {
-	layerdata = {};
+export function getStartLayerData(layer) {
+	let layerdata = {};
 	if (layers[layer].startData)
 		layerdata = layers[layer].startData();
 
@@ -88,48 +66,48 @@ function getStartLayerData(layer) {
 
 	return layerdata;
 }
-function getStartBuyables(layer) {
+export function getStartBuyables(layer) {
 	let data = {};
 	if (layers[layer].buyables) {
-		for (id in layers[layer].buyables)
+		for (let id in layers[layer].buyables)
 			if (isPlainObject(layers[layer].buyables[id]))
 				data[id] = decimalZero;
 	}
 	return data;
 }
-function getStartClickables(layer) {
+export function getStartClickables(layer) {
 	let data = {};
 	if (layers[layer].clickables) {
-		for (id in layers[layer].clickables)
+		for (let id in layers[layer].clickables)
 			if (isPlainObject(layers[layer].clickables[id]))
 				data[id] = "";
 	}
 	return data;
 }
-function getStartChallenges(layer) {
+export function getStartChallenges(layer) {
 	let data = {};
 	if (layers[layer].challenges) {
-		for (id in layers[layer].challenges)
+		for (let id in layers[layer].challenges)
 			if (isPlainObject(layers[layer].challenges[id]))
 				data[id] = 0;
 	}
 	return data;
 }
-function getStartGrid(layer) {
+export function getStartGrid(layer) {
 	let data = {};
-	if (! layers[layer].grid) return data
-	if (layers[layer].grid.maxRows === undefined) layers[layer].grid.maxRows=layers[layer].grid.rows
-	if (layers[layer].grid.maxCols === undefined) layers[layer].grid.maxCols=layers[layer].grid.cols
+	if (!layers[layer].grid) return data
+	if (layers[layer].grid.maxRows === undefined) layers[layer].grid.maxRows = layers[layer].grid.rows
+	if (layers[layer].grid.maxCols === undefined) layers[layer].grid.maxCols = layers[layer].grid.cols
 
 	for (let y = 1; y <= layers[layer].grid.maxRows; y++) {
 		for (let x = 1; x <= layers[layer].grid.maxCols; x++) {
-			data[100*y + x] = layers[layer].grid.getStartData(100*y + x)
+			data[100 * y + x] = layers[layer].grid.getStartData(100 * y + x)
 		}
 	}
 	return data;
 }
 
-function fixSave() {
+export function fixSave() {
 	defaultData = getStartPlayer();
 	fixData(defaultData, player);
 
@@ -151,7 +129,7 @@ function fixSave() {
 		}
 	}
 }
-function fixData(defaultData, newData) {
+export function fixData(defaultData, newData) {
 	for (item in defaultData) {
 		if (defaultData[item] == null) {
 			if (newData[item] === undefined)
@@ -184,7 +162,7 @@ function fixData(defaultData, newData) {
 		}
 	}
 }
-function load() {
+export function load() {
 	let get = localStorage.getItem(modInfo.id);
 
 	if (get === null || get === undefined) {
@@ -216,26 +194,26 @@ function load() {
 	loadVue();
 }
 
-function loadOptions() {
-	let get2 = localStorage.getItem(modInfo.id+"_options");
-	if (get2) 
+export function loadOptions() {
+	let get2 = localStorage.getItem(modInfo.id + "_options");
+	if (get2)
 		options = Object.assign(getStartOptions(), JSON.parse(decodeURIComponent(escape(atob(get2)))));
-	else 
+	else
 		options = getStartOptions()
 	if (themes.indexOf(options.theme) < 0) theme = "default"
 	fixData(options, getStartOptions())
 
 }
 
-function setupModInfo() {
+export function setupModInfo() {
 	modInfo.changelog = changelog;
 	modInfo.winText = winText ? winText : `Congratulations! You have reached the end and beaten this game, but for now...`;
 
 }
-function fixNaNs() {
+export function fixNaNs() {
 	NaNcheck(player);
 }
-function NaNcheck(data) {
+export function NaNcheck(data) {
 	for (item in data) {
 		if (data[item] == null) {
 		}
@@ -257,7 +235,7 @@ function NaNcheck(data) {
 		}
 	}
 }
-function exportSave() {
+export function exportSave() {
 	//if (NaNalert) return
 	let str = btoa(JSON.stringify(player));
 
@@ -269,7 +247,7 @@ function exportSave() {
 	document.execCommand("copy");
 	document.body.removeChild(el);
 }
-function importSave(imported = undefined, forced = false) {
+export function importSave(imported = undefined, forced = false) {
 	if (imported === undefined)
 		imported = prompt("Paste your save here");
 	try {
@@ -287,7 +265,7 @@ function importSave(imported = undefined, forced = false) {
 		return;
 	}
 }
-function versionCheck() {
+export function versionCheck() {
 	let setVersion = true;
 
 	if (player.versionType === undefined || player.version === undefined) {
@@ -306,17 +284,3 @@ function versionCheck() {
 		player.beta = VERSION.beta;
 	}
 }
-var saveInterval = setInterval(function () {
-	if (player === undefined)
-		return;
-	if (tmp.gameEnded && !player.keepGoing)
-		return;
-	if (options.autosave)
-		save();
-}, 5000);
-
-window.onbeforeunload = () => {
-    if (player.autosave) {
-        save();
-    }
-};

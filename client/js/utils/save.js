@@ -1,6 +1,6 @@
 // ************ Save stuff ************
 function save(force) {
-	NaNcheck(player)
+	//NaNcheck(player)
 	if (NaNalert && !force) return
 	localStorage.setItem(modInfo.id, btoa(unescape(encodeURIComponent(JSON.stringify(player)))));
 	localStorage.setItem(modInfo.id+"_options", btoa(unescape(encodeURIComponent(JSON.stringify(options)))));
@@ -185,7 +185,7 @@ function fixData(defaultData, newData) {
 	}
 }
 function load() {
-	let get = localStorage.getItem(modInfo.id);
+	let get = null // <- QUCKFIX //localStorage.getItem(modInfo.id);
 
 	if (get === null || get === undefined) {
 		player = getStartPlayer();
@@ -233,7 +233,7 @@ function setupModInfo() {
 
 }
 function fixNaNs() {
-	NaNcheck(player);
+	//NaNcheck(player);
 }
 function NaNcheck(data) {
 	for (item in data) {
@@ -280,7 +280,7 @@ function importSave(imported = undefined, forced = false) {
 		player.versionType = modInfo.id;
 		fixSave();
 		versionCheck();
-		NaNcheck(save)
+		//NaNcheck(save)
 		save();
 		window.location.reload();
 	} catch (e) {

@@ -1,7 +1,6 @@
 //load maps into one object
 var maps = {
-    tpt: {...tpt}
+    TPT: {...tpt}
 }
 
-//and delete then from global namespace
-delete tpt
+//and delete then from global namespace // <- generates errors??

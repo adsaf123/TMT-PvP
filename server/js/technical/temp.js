@@ -1,10 +1,10 @@
-var tmp = {}
-var temp = tmp // Proxy for tmp
-var funcs = {}
-var NaNalert = false;
+import Decimal from "break_eternity.js";
+import { decimalOne, decimalZero } from "./layerSupport.js";
+
+export var NaNalert = false;
 
 // Tmp will not call these
-var activeFunctions = [
+export var activeFunctions = [
 	"startData", "onPrestige", "doReset", "update", "automate",
 	"buy", "buyMax", "respec", "onPress", "onClick", "onHold", "masterButtonPress",
 	"sellOne", "sellAll", "pay", "actualCostFunction", "actualEffectFunction",
@@ -14,25 +14,29 @@ var activeFunctions = [
 	"getUnlocked", "getStyle", "getCanClick", "getTitle", "getDisplay"
 ]
 
-var noCall = doNotCallTheseFunctionsEveryTick
-for (item in noCall) {
+export var doNotCallTheseFunctionsEveryTick = ["doReset", "buy", "buyMax", "onPurchase", "blowUpEverything", "castAllSpells", "completeInBulk", "startMastery", "completeMastery"]
+
+export var alwaysKeepTheseVariables = ["primeMiles", "auto", "autoExt", "autoBld", "autoW", "autoGhost", "autoSE", "autoNN", "keepPosNeg", "distrAll", "spellInput", "pseudoUpgs", "maxToggle"]
+
+//quick fix
+
+export var noCall = doNotCallTheseFunctionsEveryTick
+for (let item in noCall) {
 	activeFunctions.push(noCall[item])
 }
 
 // Add the names of classes to traverse
-var traversableClasses = []
+export var traversableClasses = []
 
-function setupTemp() {
-	tmp = {}
+export function setupTemp() {
 	tmp.pointGen = {}
 	tmp.backgroundStyle = {}
 	tmp.displayThings = []
 	tmp.scrolled = 0
 	tmp.gameEnded = false
-	funcs = {}
 	
 	setupTempData(layers, tmp, funcs)
-	for (layer in layers){
+	for (let layer in layers){
 		tmp[layer].resetGain = {}
 		tmp[layer].nextAt = {}
 		tmp[layer].nextAtDisp = {}
@@ -50,16 +54,14 @@ function setupTemp() {
 		screenWidth: 0,
 		screenHeight: 0,
     }
-
-	updateWidth()
-
+	
 	temp = tmp
 }
 
-const boolNames = ["unlocked", "deactivated"]
+export const boolNames = ["unlocked", "deactivated"]
 
-function setupTempData(layerData, tmpData, funcsData) {
-	for (item in layerData){
+export function setupTempData(layerData, tmpData, funcsData) {
+	for (let item in layerData){
 		if (layerData[item] == null) {
 			tmpData[item] = null
 		}
@@ -92,13 +94,13 @@ function setupTempData(layerData, tmpData, funcsData) {
 }
 
 
-function updateTemp() {
+export function updateTemp() {
 	if (tmp === undefined)
 		setupTemp()
 
 	updateTempData(layers, tmp, funcs)
 
-	for (layer in layers){
+	for (let layer in layers){
 		tmp[layer].resetGain = getResetGain(layer)
 		tmp[layer].nextAt = getNextAt(layer)
 		tmp[layer].nextAtDisp = getNextAt(layer, true)
@@ -114,15 +116,15 @@ function updateTemp() {
 	tmp.backgroundStyle = readData(backgroundStyle)
 
 	tmp.displayThings = []
-	for (thing in displayThings){
+	for (let thing in displayThings){
 		let text = displayThings[thing]
 		if (isFunction(text)) text = text()
 		tmp.displayThings.push(text) 
 	}
 }
 
-function updateTempData(layerData, tmpData, funcsData, useThis) {
-	for (item in funcsData){
+export function updateTempData(layerData, tmpData, funcsData, useThis) {
+	for (let item in funcsData){
 		if (Array.isArray(layerData[item])) {
 			if (item !== "tabFormat" && item !== "content") // These are only updated when needed
 				updateTempData(layerData[item], tmpData[item], funcsData[item], useThis)
@@ -135,29 +137,28 @@ function updateTempData(layerData, tmpData, funcsData, useThis) {
 
 			if (useThis !== undefined) value = layerData[item].bind(useThis)()
 			else value = layerData[item]()
-			Vue.set(tmpData, item, value)
 		}
 	}	
 }
 
-function updateChallengeTemp(layer)
+export function updateChallengeTemp(layer)
 {
 	updateTempData(layers[layer].challenges, tmp[layer].challenges, funcs[layer].challenges)
 }
 
 
-function updateBuyableTemp(layer)
+export function updateBuyableTemp(layer)
 {
 	updateTempData(layers[layer].buyables, tmp[layer].buyables, funcs[layer].buyables)
 }
 
-function updateClickableTemp(layer)
+export function updateClickableTemp(layer)
 {
 	updateTempData(layers[layer].clickables, tmp[layer].clickables, funcs[layer].clickables)
 }
 
-function setupBuyables(layer) {
-	for (id in layers[layer].buyables) {
+export function setupBuyables(layer) {
+	for (let id in layers[layer].buyables) {
 		if (isPlainObject(layers[layer].buyables[id])) {
 			let b = layers[layer].buyables[id]
 			b.actualCostFunction = b.cost
@@ -174,6 +175,6 @@ function setupBuyables(layer) {
 	}
 }
 
-function checkDecimalNaN(x) {
+export function checkDecimalNaN(x) {
 	return (x instanceof Decimal) && !x.eq(x)
 }

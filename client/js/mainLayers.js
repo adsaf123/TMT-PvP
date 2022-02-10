@@ -121,13 +121,15 @@ addLayer("game-lobby", {
             
             if (currentGameData.players == undefined) return [["display-text", "something's wrong"]]
 
+            let i = 0
             for (const player of currentGameData.players) {
                 list[1].push(["row", []])
                 list[1][list[1].length - 1][1].push(["display-text", player.nick])
                 list[1][list[1].length - 1][1].push("blank")
                 list[1][list[1].length - 1][1].push(["display-text", player.ip == currentGameData.host ? "HOST" : ""])
                 list[1][list[1].length - 1][1].push("blank")
-                list[1][list[1].length - 1][1].push(["clickable", `kp${player.ip}`])
+                list[1][list[1].length - 1][1].push(["clickable", `kp${i}`])
+                i++
             }
         
             return list
@@ -147,7 +149,18 @@ addLayer("game-lobby", {
     },
 
     update(diff) {
-        if (player.navTab == "game-lobby")
+        if (player.navTab == "game-lobby" || player.navTab == "tree-tab")
             getGameData()
+        if (currentGameData.playerID && player.navTab == "game-lobby")
+            loadGame()
+
+        //console.log(layers?.b?.milestones)
+        if (currentGameData.playerID && layersNeededToLoad.length == 0) {
+            if (player.navTab != "tree-tab") showNavTab("tree-tab")
+            fix(currentGameData?.gameState?.playersStates[currentGameData.playerID], player)
+            fix(currentGameData?.gameState?.playersTmps[currentGameData.playerID], tmp)
+            fix(currentGameData?.gameState?.layers, layers)
+            fix(currentGameData?.gameState?.funcs, funcs)
+        }
     }
 })

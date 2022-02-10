@@ -1,15 +1,14 @@
 // ************ Big Feature related ************
 
-function respecBuyables(layer) {
+export function respecBuyables(layer) {
 	if (!layers[layer].buyables) return
 	if (!layers[layer].buyables.respec) return
 	if (!player[layer].noRespecConfirm && !confirm(tmp[layer].buyables.respecMessage || "Are you sure you want to respec? This will force you to do a \"" + (tmp[layer].name ? tmp[layer].name : layer) + "\" reset as well!")) return
 	run(layers[layer].buyables.respec, layers[layer].buyables)
 	updateBuyableTemp(layer)
-	document.activeElement.blur()
 }
 
-function canAffordUpgrade(layer, id) {
+export function canAffordUpgrade(layer, id) {
 	let upg = tmp[layer].upgrades[id]
 	if(tmp[layer].deactivated) return false
 	if (tmp[layer].upgrades[id].canAfford === false) return false
@@ -20,14 +19,14 @@ function canAffordUpgrade(layer, id) {
 	return true
 }
 
-function canBuyBuyable(layer, id) {
+export function canBuyBuyable(layer, id) {
 	let b = temp[layer].buyables[id]
 	return (b.unlocked && run(b.canAfford, b) && player[layer].buyables[id].lt(b.purchaseLimit) && !tmp[layer].deactivated)
 }
 
 
 
-function canAffordPurchase(layer, thing, cost) {
+export function canAffordPurchase(layer, thing, cost) {
 	if (thing.currencyInternalName) {
 		let name = thing.currencyInternalName
 		if (thing.currencyLocation) {
@@ -46,11 +45,11 @@ function canAffordPurchase(layer, thing, cost) {
 	}
 }
 
-function buyUpgrade(layer, id) {
+export function buyUpgrade(layer, id) {
 	buyUpg(layer, id)
 }
 
-function buyUpg(layer, id) {
+export function buyUpg(layer, id) {
 	if (!tmp[layer].upgrades || !tmp[layer].upgrades[id]) return
 	let upg = tmp[layer].upgrades[id]
 	if (!player[layer].unlocked || player[layer].deactivated) return
@@ -90,7 +89,7 @@ function buyUpg(layer, id) {
 	needCanvasUpdate = true
 }
 
-function buyMaxBuyable(layer, id) {
+export function buyMaxBuyable(layer, id) {
 	if (!player[layer].unlocked) return
 	if (!tmp[layer].buyables[id].unlocked) return
 	if (!tmp[layer].buyables[id].canBuy) return
@@ -100,7 +99,7 @@ function buyMaxBuyable(layer, id) {
 	updateBuyableTemp(layer)
 }
 
-function buyBuyable(layer, id) {
+export function buyBuyable(layer, id) {
 	if (!player[layer].unlocked) return
 	if (!tmp[layer].buyables[id].unlocked) return
 	if (!tmp[layer].buyables[id].canBuy) return
@@ -109,7 +108,7 @@ function buyBuyable(layer, id) {
 	updateBuyableTemp(layer)
 }
 
-function clickClickable(layer, id) {
+export function clickClickable(layer, id) {
 	if (!player[layer].unlocked || tmp[layer].deactivated) return
 	if (!tmp[layer].clickables[id].unlocked) return
 	if (!tmp[layer].clickables[id].canClick) return
@@ -118,7 +117,7 @@ function clickClickable(layer, id) {
 	updateClickableTemp(layer)
 }
 
-function clickGrid(layer, id) {
+export function clickGrid(layer, id) {
 	if (!player[layer].unlocked  || tmp[layer].deactivated) return
 	if (!run(layers[layer].grid.getUnlocked, layers[layer].grid, id)) return
 	if (!gridRun(layer, 'getCanClick', player[layer].grid[id], id)) return
@@ -126,8 +125,8 @@ function clickGrid(layer, id) {
 	gridRun(layer, 'onClick', player[layer].grid[id], id)
 }
 
-// Function to determine if the player is in a challenge
-function inChallenge(layer, id) {
+// export function to determine if the player is in a challenge
+export function inChallenge(layer, id) {
 	let challenge = player[layer].activeChallenge
 	if (!challenge) return false
 	id = toNumber(id)
@@ -140,9 +139,7 @@ function inChallenge(layer, id) {
 
 // ************ Misc ************
 
-var onTreeTab = true
-
-function showTab(name, prev) {
+export function showTab(name, prev) {
 	if (LAYERS.includes(name) && !layerunlocked(name)) return
 	if (player.tab !== name) clearParticles(function(p) {return p.layer === player.tab})
 	if (tmp[name] && player.tab === name && isPlainObject(tmp[name].tabFormat)) {
@@ -157,7 +154,7 @@ function showTab(name, prev) {
 
 }
 
-function showNavTab(name, prev) {
+export function showNavTab(name, prev) {
 	console.log(prev)
 	if (LAYERS.includes(name) && !layerunlocked(name)) return
 	if (player.navTab !== name) clearParticles(function(p) {return p.layer === player.navTab})
@@ -173,7 +170,7 @@ function showNavTab(name, prev) {
 }
 
 
-function goBack(layer) {
+export function goBack(layer) {
 	let nextTab = "none"
 
 	if (player[layer].prevTab) nextTab = player[layer].prevTab
@@ -184,7 +181,7 @@ function goBack(layer) {
 
 }
 
-function layOver(obj1, obj2) {
+export function layOver(obj1, obj2) {
 	for (let x in obj2) {
 		if (obj2[x] instanceof Decimal) obj1[x] = new Decimal(obj2[x])
 		else if (obj2[x] instanceof Object) layOver(obj1[x], obj2[x]);
@@ -192,7 +189,7 @@ function layOver(obj1, obj2) {
 	}
 }
 
-function prestigeNotify(layer) {
+export function prestigeNotify(layer) {
 	if (layers[layer].prestigeNotify) return layers[layer].prestigeNotify()
 	
 	if (isPlainObject(tmp[layer].tabFormat)) {
@@ -213,12 +210,12 @@ function prestigeNotify(layer) {
 	else return false
 }
 
-function notifyLayer(name) {
+export function notifyLayer(name) {
 	if (player.tab == name || !layerunlocked(name)) return
 	player.notify[name] = 1
 }
 
-function subtabShouldNotify(layer, family, id) {
+export function subtabShouldNotify(layer, family, id) {
     let subtab = {}
     if (family == "mainTabs") subtab = tmp[layer].tabFormat[id]
     else subtab = tmp[layer].microtabs[family][id]
@@ -227,7 +224,7 @@ function subtabShouldNotify(layer, family, id) {
     else return subtab.shouldNotify
 }
 
-function subtabResetNotify(layer, family, id) {
+export function subtabResetNotify(layer, family, id) {
 	let subtab = {}
 	if (family == "mainTabs") subtab = tmp[layer].tabFormat[id]
 	else subtab = tmp[layer].microtabs[family][id]
@@ -235,27 +232,27 @@ function subtabResetNotify(layer, family, id) {
 	else return subtab.prestigeNotify
 }
 
-function nodeShown(layer) {
+export function nodeShown(layer) {
 	return layerShown(layer)
 }
 
-function layerunlocked(layer) {
+export function layerunlocked(layer) {
 	if (tmp[layer] && tmp[layer].type == "none") return (player[layer].unlocked)
 	return LAYERS.includes(layer) && (player[layer].unlocked || (tmp[layer].canReset && tmp[layer].layerShown))
 }
 
-function keepGoing() {
+export function keepGoing() {
 	player.keepGoing = true;
 	needCanvasUpdate = true;
 }
 
-function toNumber(x) {
+export function toNumber(x) {
 	if (x.mag !== undefined) return x.toNumber()
 	if (x + 0 !== x) return parseFloat(x)
 	return x
 }
 
-function updateMilestones(layer) {
+export function updateMilestones(layer) {
 	if (tmp[layer].deactivated) return
 	for (id in layers[layer].milestones) {
 		if (!(hasMilestone(layer, id)) && layers[layer].milestones[id].done()) {
@@ -267,7 +264,7 @@ function updateMilestones(layer) {
 	}
 }
 
-function updateAchievements(layer) {
+export function updateAchievements(layer) {
 	if (tmp[layer].deactivated) return
 	for (id in layers[layer].achievements) {
 		if (isPlainObject(layers[layer].achievements[id]) && !(hasAchievement(layer, id)) && layers[layer].achievements[id].done()) {
@@ -278,7 +275,7 @@ function updateAchievements(layer) {
 	}
 }
 
-function addTime(diff, layer) {
+export function addTime(diff, layer) {
 	let data = player
 	let time = data.timePlayed
 	if (layer) {
@@ -302,48 +299,16 @@ function addTime(diff, layer) {
 	else data.timePlayed = time
 }
 
-shiftDown = false
-ctrlDown = false
-
-document.onkeydown = function (e) {
-	if (player === undefined) return;
-	shiftDown = e.shiftKey
-	ctrlDown = e.ctrlKey
-	if (tmp.gameEnded && !player.keepGoing) return;
-	let key = e.key
-	if (ctrlDown) key = "ctrl+" + key
-	if (onFocused) return
-	if (ctrlDown && hotkeys[key]) e.preventDefault()
-	if (hotkeys[key]) {
-		let k = hotkeys[key]
-		if (player[k.layer].unlocked && tmp[k.layer].hotkeys[k.id].unlocked)
-			k.onPress()
-	}
-}
-
-document.onkeyup = function (e) {
-	shiftDown = e.shiftKey
-	ctrlDown = e.ctrlKey
-}
-
-var onFocused = false
-function focused(x) {
-	onFocused = x
-}
-
-
-function isFunction(obj) {
+export function isFunction(obj) {
 	return !!(obj && obj.constructor && obj.call && obj.apply);
 };
 
-function isPlainObject(obj) {
+export function isPlainObject(obj) {
 	return (!!obj) && (obj.constructor === Object)
 }
 
-document.title = modInfo.name
-
 // Converts a string value to whatever it's supposed to be
-function toValue(value, oldValue) {
+export function toValue(value, oldValue) {
 	if (oldValue instanceof Decimal) {
 		value = new Decimal (value)
 		if (checkDecimalNaN(value)) return decimalZero
@@ -358,8 +323,8 @@ function toValue(value, oldValue) {
 var activePopups = [];
 var popupID = 0;
 
-// Function to show popups
-function doPopup(type = "none", text = "This is a test popup.", title = "", timer = 3, color = "") {
+// export function to show popups
+export function doPopup(type = "none", text = "This is a test popup.", title = "", timer = 3, color = "") {
 	switch (type) {
 		case "achievement":
 			popupTitle = "Achievement Unlocked!";
@@ -383,8 +348,8 @@ function doPopup(type = "none", text = "This is a test popup.", title = "", time
 }
 
 
-//Function to reduce time on active popups
-function adjustPopupTime(diff) {
+//function to reduce time on active popups
+export function adjustPopupTime(diff) {
 	for (popup in activePopups) {
 		activePopups[popup].time -= diff;
 		if (activePopups[popup]["time"] < 0) {
@@ -393,7 +358,7 @@ function adjustPopupTime(diff) {
 	}
 }
 
-function run(func, target, args = null) {
+export function run(func, target, args = null) {
 	if (isFunction(func)) {
 		let bound = func.bind(target)
 		return bound(args)
@@ -402,7 +367,7 @@ function run(func, target, args = null) {
 		return func;
 }
 
-function gridRun(layer, func, data, id) {
+export function gridRun(layer, func, data, id) {
 	if (isFunction(layers[layer].grid[func])) {
 		let bound = layers[layer].grid[func].bind(layers[layer].grid)
 		return bound(data, id)

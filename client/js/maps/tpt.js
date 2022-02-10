@@ -9751,7 +9751,7 @@ var tpt = {
                 "achievements",
             ],
             update(diff) {	// Added this section to call adjustNotificationTime every tick, to reduce notification timers
-                adjustNotificationTime(diff);
+                adjustPopupTime(diff);
             },
         },
 
@@ -10021,5 +10021,4 @@ var tpt = {
         return gain
     },
     isEndgame() { return new Decimal("e3.14e16") },
-
 }

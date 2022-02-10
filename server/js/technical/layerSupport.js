@@ -1,29 +1,27 @@
-var layers = {}
+import Decimal from "break_eternity.js"
 
-const decimalZero = new Decimal(0)
-const decimalOne = new Decimal(1)
-const decimalNaN = new Decimal(NaN)
+export const decimalZero = new Decimal(0)
+export const decimalOne = new Decimal(1)
+export const decimalNaN = new Decimal(NaN)
 
-const defaultGlow = "#ff0000"
+export const defaultGlow = "#ff0000"
 
 
-function layerShown(layer){
+export function layerShown(layer){
     return tmp[layer].layerShown;
 }
 
-var LAYERS = Object.keys(layers);
+export var hotkeys = {};
 
-var hotkeys = {};
+export var maxRow = 0;
 
-var maxRow = 0;
-
-function updateHotkeys()
+export function updateHotkeys()
 {
     hotkeys = {};
-    for (layer in layers){
-        hk = layers[layer].hotkeys
+    for (let layer in layers){
+        let hk = layers[layer].hotkeys
         if (hk){
-            for (id in hk){
+            for (let id in hk){
 				hotkeys[hk[id].key] = hk[id]
                 hotkeys[hk[id].key].layer = layer
                 hotkeys[hk[id].key].id = id
@@ -34,41 +32,43 @@ function updateHotkeys()
     }
 }
 
-var ROW_LAYERS = {}
-var TREE_LAYERS = {}
-var OTHER_LAYERS = {}
+export var ROW_LAYERS = {}
+export var TREE_LAYERS = {}
+export var OTHER_LAYERS = {}
 
-function updateLayers(){
+export var LAYERS = {}
+
+export function updateLayers(){
     LAYERS = Object.keys(layers);
     ROW_LAYERS = {}
     TREE_LAYERS = {}
     OTHER_LAYERS = {}
-    for (layer in layers){
+    for (let layer in layers){
         setupLayer(layer)
     }
-    for (row in OTHER_LAYERS) {
+    for (let row in OTHER_LAYERS) {
         OTHER_LAYERS[row].sort((a, b) => (a.position > b.position) ? 1 : -1)
-        for (layer in OTHER_LAYERS[row])
+        for (let layer in OTHER_LAYERS[row])
             OTHER_LAYERS[row][layer] = OTHER_LAYERS[row][layer].layer 
     }
-    for (row in TREE_LAYERS) {
+    for (let row in TREE_LAYERS) {
         TREE_LAYERS[row].sort((a, b) => (a.position > b.position) ? 1 : -1)
-            for (layer in TREE_LAYERS[row])
+            for (let layer in TREE_LAYERS[row])
             TREE_LAYERS[row][layer] = TREE_LAYERS[row][layer].layer
     }
     let treeLayers2 = []
-    for (x = 0; x < maxRow + 1; x++) {
+    for (let x = 0; x < maxRow + 1; x++) {
         if (TREE_LAYERS[x]) treeLayers2.push(TREE_LAYERS[x])
     }
     TREE_LAYERS = treeLayers2
     updateHotkeys()
 }
 
-function setupLayer(layer){
+export function setupLayer(layer){
     layers[layer].layer = layer
     if (layers[layer].upgrades){
         setRowCol(layers[layer].upgrades)
-        for (thing in layers[layer].upgrades){
+        for (let thing in layers[layer].upgrades){
             if (isPlainObject(layers[layer].upgrades[thing])){
                 layers[layer].upgrades[thing].id = thing
                 layers[layer].upgrades[thing].layer = layer
@@ -78,7 +78,7 @@ function setupLayer(layer){
         }
     }
     if (layers[layer].milestones){
-        for (thing in layers[layer].milestones){
+        for (let thing in layers[layer].milestones){
             if (isPlainObject(layers[layer].milestones[thing])){
                 layers[layer].milestones[thing].id = thing
                 layers[layer].milestones[thing].layer = layer
@@ -89,7 +89,7 @@ function setupLayer(layer){
     }
     if (layers[layer].achievements){
         setRowCol(layers[layer].achievements)
-        for (thing in layers[layer].achievements){
+        for (let thing in layers[layer].achievements){
             if (isPlainObject(layers[layer].achievements[thing])){
                 layers[layer].achievements[thing].id = thing
                 layers[layer].achievements[thing].layer = layer
@@ -100,7 +100,7 @@ function setupLayer(layer){
     }
     if (layers[layer].challenges){
         setRowCol(layers[layer].challenges)
-        for (thing in layers[layer].challenges){
+        for (let thing in layers[layer].challenges){
             if (isPlainObject(layers[layer].challenges[thing])){
                 layers[layer].challenges[thing].id = thing
                 layers[layer].challenges[thing].layer = layer
@@ -117,7 +117,7 @@ function setupLayer(layer){
     if (layers[layer].buyables){
         layers[layer].buyables.layer = layer
         setRowCol(layers[layer].buyables)
-        for (thing in layers[layer].buyables){
+        for (let thing in layers[layer].buyables){
             if (isPlainObject(layers[layer].buyables[thing])){
                 layers[layer].buyables[thing].id = thing
                 layers[layer].buyables[thing].layer = layer
@@ -134,7 +134,7 @@ function setupLayer(layer){
     if (layers[layer].clickables){
         layers[layer].clickables.layer = layer
         setRowCol(layers[layer].clickables)
-        for (thing in layers[layer].clickables){
+        for (let thing in layers[layer].clickables){
             if (isPlainObject(layers[layer].clickables[thing])){
                 layers[layer].clickables[thing].id = thing
                 layers[layer].clickables[thing].layer = layer
@@ -146,7 +146,8 @@ function setupLayer(layer){
 
     if (layers[layer].bars){
         layers[layer].bars.layer = layer
-        for (thing in layers[layer].bars){
+        for (let thing in layers[layer].bars){
+            if (!isPlainObject(layers[layer].bars[thing])) return 
             layers[layer].bars[thing].id = thing
             layers[layer].bars[thing].layer = layer
             if (layers[layer].bars[thing].unlocked === undefined)
@@ -155,7 +156,7 @@ function setupLayer(layer){
     }
 
     if (layers[layer].infoboxes){
-        for (thing in layers[layer].infoboxes){
+        for (let thing in layers[layer].infoboxes){
             layers[layer].infoboxes[thing].id = thing
             layers[layer].infoboxes[thing].layer = layer
             if (layers[layer].infoboxes[thing].unlocked === undefined)
@@ -172,7 +173,7 @@ function setupLayer(layer){
 
     }
     if (layers[layer].startData) {
-        data = layers[layer].startData()
+        let data = layers[layer].startData()
         if (data.best !== undefined && data.showBest === undefined) layers[layer].showBest = true
         if (data.total !== undefined && data.showTotal === undefined) layers[layer].showTotal = true
     }
@@ -211,7 +212,7 @@ function setupLayer(layer){
 }
 
 
-function addLayer(layerName, layerData, tabLayers = null){ // Call this to add layers from a different file!
+export function addLayer(layerName, layerData, tabLayers = null){ // Call this to add layers from a different file!
     layers[layerName] = layerData
     layers[layerName].isLayer = true
     if (tabLayers !== null)
@@ -236,20 +237,20 @@ function addLayer(layerName, layerData, tabLayers = null){ // Call this to add l
     }
 }
 
-function addNode(layerName, layerData){ // Does the same thing, but for non-layer nodes
+export function addNode(layerName, layerData){ // Does the same thing, but for non-layer nodes
     layers[layerName] = layerData
     layers[layerName].isLayer = false
 }
 
-// If data is a function, return the result of calling it. Otherwise, return the data.
-function readData(data, args=null){
+// If data is a export function, return the result of calling it. Otherwise, return the data.
+export function readData(data, args=null){
 	if ((!!data && data.constructor && data.call && data.apply))
 		return data(args);
 	else
 		return data;
 }
 
-function setRowCol(upgrades) {
+export function setRowCol(upgrades) {
     if (upgrades.rows && upgrades.cols) return
     let maxRow = 0
     let maxCol = 0
@@ -263,7 +264,7 @@ function setRowCol(upgrades) {
     upgrades.cols = maxCol
 }
 
-function someLayerUnlocked(row){
+export function someLayerUnlocked(row){
     for (layer in ROW_LAYERS[row])
         if (player[layer].unlocked)
             return true
@@ -272,23 +273,7 @@ function someLayerUnlocked(row){
 
 
 // This isn't worth making a .ts file over
-const UP = 0
-const DOWN = 1
-const LEFT = 2
-const RIGHT = 3
-
-
-addLayer("info-tab", {
-    tabFormat: ["info-tab"],
-    row: "otherside"
-})
-
-addLayer("options-tab", {
-    tabFormat: ["options-tab"],
-    row: "otherside"
-})
-
-addLayer("changelog-tab", {
-    tabFormat() {return ([["raw-html", modInfo.changelog]])},
-    row: "otherside"
-})
+export const UP = 0
+export const DOWN = 1
+export const LEFT = 2
+export const RIGHT = 3

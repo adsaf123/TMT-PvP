@@ -1,10 +1,11 @@
 const SERVERINFO = {
-    SERVERIP: "https://TMTPVPServer.adsaf.repl.co",
+    SERVERIP: "https://TMTPVPServer.adsaf123.repl.co",
     PLAYERSETNICK: "playerSetNick",
     PLAYERJOINGAME: "playerJoinGame",
     PLAYERHOSTGAME: "playerHostGame",
     HOSTKICKPLAYER: "hostKickPlayer",
-    HOSTSTARTGAME: "hostStartGame"
+    HOSTSTARTGAME: "hostStartGame",
+    PLAYERDOSOMETHING: "playerDoSomething"
 }
 
 var gamesList = {}
@@ -95,15 +96,17 @@ var generateGamesClickables = function () {
 var generateKickClickables = function () {
     var clickables = {}
     if (currentGameData.players == undefined) return clickables
+    let i = 0
     for (const k of currentGameData.players) {
         clickables[`kp${k.ip}`] = {}
-        clickables[`kp${k.ip}`].id = `kp${k.ip}`
+        clickables[`kp${k.ip}`].id = `kp${i}`
         clickables[`kp${k.ip}`].layer = "game-lobby"
         clickables[`kp${k.ip}`].style = { "width": "30px", "height": "30px", "min-height": "30px" }
         clickables[`kp${k.ip}`].unlocked = function() { return true }
         clickables[`kp${k.ip}`].display = function () { return "kick" }
         clickables[`kp${k.ip}`].canClick = function () { return true }
         clickables[`kp${k.ip}`].onClick = function () { sendDataToServer({ type: SERVERINFO.HOSTKICKPLAYER, playerID: k.ip }) }
+        i++
     }
     clickables["return"] = {
         display() { return "return to menu" },
@@ -121,4 +124,23 @@ var joinGame = function (gameID) {
         type: SERVERINFO.PLAYERJOINGAME,
         gameID: gameID
     })
+}
+
+var loadGame = function () {
+    for (const layer in maps[currentGameData.gameState.tree].layers) {
+        lateAddLayer(layer, maps[currentGameData.gameState.tree].layers[layer])
+    }
+    showNavTab("tree-tab")
+} 
+
+var fix = function (newData, oldData) {
+    for (item in newData) {
+        if (oldData[item] instanceof Decimal) {
+            oldData[item] = new Decimal(newData[item])
+        } else if (oldData[item] instanceof Object) {
+            fix(newData[item], oldData[item])
+        } else {
+            oldData[item] = newData[item]
+        }
+    }
 }
