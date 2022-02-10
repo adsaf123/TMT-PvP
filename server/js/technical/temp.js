@@ -95,10 +95,12 @@ export function setupTempData(layerData, tmpData, funcsData) {
 
 
 export function updateTemp() {
-	if (tmp === undefined)
-		setupTemp()
-
-	updateTempData(layers, tmp, funcs)
+	if (tmp === undefined) {
+    tmp = {}
+  	setupTemp()
+  }
+	
+  updateTempData(layers, tmp, funcs)
 
 	for (let layer in layers){
 		tmp[layer].resetGain = getResetGain(layer)
@@ -113,14 +115,7 @@ export function updateTemp() {
 	}
 
 	tmp.pointGen = getPointGen()
-	tmp.backgroundStyle = readData(backgroundStyle)
-
-	tmp.displayThings = []
-	for (let thing in displayThings){
-		let text = displayThings[thing]
-		if (isFunction(text)) text = text()
-		tmp.displayThings.push(text) 
-	}
+  
 }
 
 export function updateTempData(layerData, tmpData, funcsData, useThis) {
@@ -137,6 +132,7 @@ export function updateTempData(layerData, tmpData, funcsData, useThis) {
 
 			if (useThis !== undefined) value = layerData[item].bind(useThis)()
 			else value = layerData[item]()
+      tmpData[item] = value
 		}
 	}	
 }

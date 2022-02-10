@@ -930,7 +930,7 @@ const tpt = {
             exponent() { return ((Array.isArray(tmp.ma.mastered)) ? tmp.ma.mastered.includes(this.layer) : false) ? new Decimal(1.4) : new Decimal(1.85) }, // Prestige currency exponent
             base() { return ((Array.isArray(tmp.ma.mastered)) ? tmp.ma.mastered.includes(this.layer) : false) ? new Decimal(10) : new Decimal(1e15) },
             gainMult() { // Calculate the multiplier for main currency from bonuses
-                mult = new Decimal(1)
+                let mult = new Decimal(1)
                 return mult
             },
             gainExp() { // Calculate the exponent on main currency from bonuses
@@ -1336,7 +1336,7 @@ const tpt = {
             type: "normal", // normal: cost to gain currency depends on amount gained. static: cost depends on how much you already have
             exponent() { return new Decimal(((Array.isArray(tmp.ma.mastered)) ? tmp.ma.mastered.includes(this.layer) : false) ? .025 : .02) }, // Prestige currency exponent
             gainMult() { // Calculate the multiplier for main currency from bonuses
-                mult = new Decimal(1)
+                let mult = new Decimal(1)
                 if (hasUpgrade("e", 24)) mult = mult.times(upgradeEffect("e", 24));
                 return mult
             },
@@ -1613,7 +1613,7 @@ const tpt = {
             exponent() { return new Decimal(((Array.isArray(tmp.ma.mastered)) ? tmp.ma.mastered.includes(this.layer) : false) ? 1.4 : 1.85) }, // Prestige currency exponent
             base() { return new Decimal(((Array.isArray(tmp.ma.mastered)) ? tmp.ma.mastered.includes(this.layer) : false) ? 10 : (hasUpgrade("ss", 11) ? 1e10 : 1e15)) },
             gainMult() { // Calculate the multiplier for main currency from bonuses
-                mult = new Decimal(1)
+                let mult = new Decimal(1)
                 return mult
             },
             gainExp() { // Calculate the exponent on main currency from bonuses
@@ -2667,7 +2667,7 @@ const tpt = {
             type: "normal", // normal: cost to gain currency depends on amount gained. static: cost depends on how much you already have
             exponent() { return new Decimal(((Array.isArray(tmp.ma.mastered)) ? tmp.ma.mastered.includes(this.layer) : false) ? .2 : .125) }, // Prestige currency exponent
             gainMult() { // Calculate the multiplier for main currency from bonuses
-                mult = new Decimal(1)
+                let mult = new Decimal(1)
                 if (hasUpgrade("q", 14)) mult = mult.times(upgradeEffect("q", 14).h);
                 if (player.m.unlocked) mult = mult.times(((Array.isArray(tmp.ma.mastered)) ? tmp.ma.mastered.includes("m") : false) ? tmp.m.mainHexEff : tmp.m.hexEff);
                 if (hasUpgrade("ba", 22)) mult = mult.times(tmp.ba.negBuff);
@@ -2975,7 +2975,7 @@ const tpt = {
             type: "normal", // normal: cost to gain currency depends on amount gained. static: cost depends on how much you already have
             exponent() { return new Decimal(((Array.isArray(tmp.ma.mastered)) ? tmp.ma.mastered.includes(this.layer) : false) ? .008 : .0075) }, // Prestige currency exponent
             gainMult() { // Calculate the multiplier for main currency from bonuses
-                mult = new Decimal(1)
+                let mult = new Decimal(1)
                 if (hasUpgrade("q", 14)) mult = mult.times(upgradeEffect("q", 14).q);
                 mult = mult.times(improvementEffect("q", 33));
                 if (player.m.unlocked) mult = mult.times(((Array.isArray(tmp.ma.mastered)) ? tmp.ma.mastered.includes("m") : false) ? tmp.m.mainHexEff : tmp.m.hexEff);
@@ -3605,7 +3605,7 @@ const tpt = {
                 return exp;
             }, // Prestige currency exponent
             gainMult() { // Calculate the multiplier for main currency from bonuses
-                mult = buyableEffect("o", 11);
+                let mult = buyableEffect("o", 11);
                 return mult
             },
             gainExp() { // Calculate the exponent on main currency from bonuses
@@ -3962,7 +3962,7 @@ const tpt = {
             exponent() { return new Decimal(((Array.isArray(tmp.ma.mastered)) ? tmp.ma.mastered.includes(this.layer) : false) ? 1.07 : 1.1) }, // Prestige currency exponent
             base() { return new Decimal(((Array.isArray(tmp.ma.mastered)) ? tmp.ma.mastered.includes(this.layer) : false) ? 1.1 : 1.15) },
             gainMult() { // Calculate the multiplier for main currency from bonuses
-                mult = new Decimal(1)
+                let mult = new Decimal(1)
                 if (player.ne.unlocked) mult = mult.div(tmp.ne.thoughtEff1);
                 return mult
             },
@@ -4206,7 +4206,7 @@ const tpt = {
             type: "normal", // normal: cost to gain currency depends on amount gained. static: cost depends on how much you already have
             exponent() { return new Decimal(((Array.isArray(tmp.ma.mastered)) ? tmp.ma.mastered.includes(this.layer) : false) ? 0.0085 : 0.007) }, // Prestige currency exponent
             gainMult() { // Calculate the multiplier for main currency from bonuses
-                mult = new Decimal(1);
+                let mult = new Decimal(1);
                 if (hasAchievement("a", 74)) mult = mult.times(challengeEffect("h", 32));
                 return mult.times(tmp.n.realDustEffs2 ? tmp.n.realDustEffs2.purpleBlue : new Decimal(1));
             },
@@ -4576,7 +4576,7 @@ const tpt = {
             type: "normal", // normal: cost to gain currency depends on amount gained. static: cost depends on how much you already have
             exponent() { return new Decimal(((Array.isArray(tmp.ma.mastered)) ? tmp.ma.mastered.includes(this.layer) : false) ? 0.0125 : 0.005) }, // Prestige currency exponent
             gainMult() { // Calculate the multiplier for main currency from bonuses
-                mult = new Decimal(1);
+                let mult = new Decimal(1);
                 if (hasAchievement("a", 74)) mult = mult.times(challengeEffect("h", 32));
                 if (player.mc.unlocked) mult = mult.times(clickableEffect("mc", 22));
                 return mult
@@ -4899,7 +4899,7 @@ const tpt = {
                 return b;
             },
             gainMult() { // Calculate the multiplier for main currency from bonuses
-                mult = new Decimal(1)
+                let mult = new Decimal(1)
                 if (player.i.buyables[11].gte(2)) mult = mult.div(buyableEffect("s", 17));
                 return mult
             },
@@ -5846,7 +5846,7 @@ const tpt = {
             type: "normal", // normal: cost to gain currency depends on amount gained. static: cost depends on how much you already have
             exponent() { return new Decimal(((Array.isArray(tmp.ma.mastered)) ? tmp.ma.mastered.includes(this.layer) : false) ? 0.05 : 0.03) }, // Prestige currency exponent
             gainMult() { // Calculate the multiplier for main currency from bonuses
-                mult = new Decimal(1);
+                let mult = new Decimal(1);
                 if (hasUpgrade("hn", 45)) mult = mult.times(upgradeEffect("hn", 45));
                 if (hasUpgrade("g", 35) && player.i.buyables[12].gte(2)) mult = mult.times(upgradeEffect("g", 35));
                 if (hasUpgrade("s", 33) && player.i.buyables[12].gte(5)) mult = mult.times(upgradeEffect("s", 33));
@@ -6074,7 +6074,7 @@ const tpt = {
                 return exp;
             }, // Prestige currency exponent
             gainMult() { // Calculate the multiplier for main currency from bonuses
-                mult = new Decimal(1);
+                let mult = new Decimal(1);
                 if (hasUpgrade("g", 35) && player.i.buyables[12].gte(2)) mult = mult.times(upgradeEffect("g", 35));
                 if (hasUpgrade("e", 41) && player.i.buyables[12].gte(3)) mult = mult.times(upgradeEffect("e", 41));
                 if (hasUpgrade("t", 41) && player.i.buyables[12].gte(4)) mult = mult.times(2.5e3);
@@ -6512,7 +6512,7 @@ const tpt = {
             exponent: new Decimal(1.8), // Prestige currency exponent
             base() { return new Decimal(((Array.isArray(tmp.ma.mastered)) ? tmp.ma.mastered.includes(this.layer) : false) ? "1e100" : "1e250") },
             gainMult() { // Calculate the multiplier for main currency from bonuses
-                mult = new Decimal(1)
+                let mult = new Decimal(1)
                 return mult
             },
             gainExp() { // Calculate the exponent on main currency from bonuses
@@ -6785,7 +6785,7 @@ const tpt = {
                 return "which multiplies Honour & Hyperspace Energy gain by " + format(tmp.ma.effect) + (tmp.nerdMode ? (" (" + format(tmp.ma.effectBase) + "x each)") : "") + ", and adds " + format(tmp.ma.effect.max(1).log10().times(2.5)) + "% to Hyper Building Power" + (tmp.nerdMode ? (" (+" + format(tmp.ma.effectBase.max(1).log10().times(2.5)) + "% each)") : "")
             },
             gainMult() { // Calculate the multiplier for main currency from bonuses
-                mult = new Decimal(1)
+                let mult = new Decimal(1)
                 if (hasAchievement("a", 131)) mult = mult.div(1.1);
                 if (hasAchievement("a", 95)) mult = mult.div(1.15);
                 if (hasAchievement("a", 134)) mult = mult.times(Decimal.pow(.999925, player.ps.points));
@@ -7025,7 +7025,7 @@ const tpt = {
             type: "normal", // normal: cost to gain currency depends on amount gained. static: cost depends on how much you already have
             exponent: new Decimal(0.01), // Prestige currency exponent
             gainMult() { // Calculate the multiplier for main currency from bonuses
-                mult = new Decimal(1);
+                let mult = new Decimal(1);
                 if (player.mc.unlocked) mult = mult.times(clickableEffect("mc", 12));
                 if (player.mc.upgrades.includes(11)) mult = mult.times(buyableEffect("mc", 12));
                 if (hasMilestone("ge", 2)) mult = mult.times(player.en.total.max(1));
@@ -7359,7 +7359,7 @@ const tpt = {
             type: "normal", // normal: cost to gain currency depends on amount gained. static: cost depends on how much you already have
             exponent: new Decimal(4), // Prestige currency exponent
             gainMult() { // Calculate the multiplier for main currency from bonuses
-                mult = new Decimal(1);
+                let mult = new Decimal(1);
                 if (player.mc.upgrades.includes(11)) mult = mult.times(buyableEffect("mc", 12));
                 if (hasMilestone("mc", 0)) mult = mult.times(player.ne.thoughts.max(1));
                 if (hasUpgrade("ai", 33)) mult = mult.times(upgradeEffect("ai", 33));
@@ -7870,7 +7870,7 @@ const tpt = {
             exponent: new Decimal(2.5), // Prestige currency exponent
             base: new Decimal("1e10000"),
             gainMult() { // Calculate the multiplier for main currency from bonuses
-                mult = new Decimal(1)
+                let mult = new Decimal(1)
                 return mult
             },
             canBuyMax() { return false },
@@ -8104,7 +8104,7 @@ const tpt = {
             rev() { return player.ne.signals.plus(1).log10().div(10).pow(.75).times(player.id.points).pow(hasMilestone("id", 0) ? 2 : 1).times(hasUpgrade("ai", 32) ? 1.5 : 1).times(hasUpgrade("ai", 14) ? 1.5 : 1).floor() },
             revEff() { return Decimal.pow(1e25, tmp.id.rev.pow(.95)) },
             gainMult() { // Calculate the multiplier for main currency from bonuses
-                mult = new Decimal(1)
+                let mult = new Decimal(1)
                 if (hasMilestone("id", 2)) mult = mult.div(player.ne.points.plus(1).log10().plus(1));
                 return mult
             },
@@ -8577,7 +8577,7 @@ const tpt = {
             exponent: new Decimal(2), // Prestige currency exponent
             roundUpCost: true,
             gainMult() { // Calculate the multiplier for main currency from bonuses
-                mult = new Decimal(1);
+                let mult = new Decimal(1);
                 if (hasUpgrade("ai", 22)) mult = mult.times(3);
                 if (hasUpgrade("ai", 41)) mult = mult.times(upgradeEffect("ai", 41));
                 if (hasUpgrade("ai", 43)) mult = mult.times(upgradeEffect("ai", 43));
@@ -9059,7 +9059,7 @@ const tpt = {
             exponent: new Decimal(1.2), // Prestige currency exponent
             base: new Decimal(1.025),
             gainMult() { // Calculate the multiplier for main currency from bonuses
-                mult = new Decimal(1)
+                let mult = new Decimal(1)
                 return mult
             },
             gainExp() { // Calculate the exponent on main currency from bonuses
@@ -10021,9 +10021,10 @@ const tpt = {
         if (inChallenge("h", 31)) gain = gain.root(tmp.h.pointRoot31);
         if (hasUpgrade("ss", 43)) gain = gain.pow(gain.lt(tmp.ss.upgrades[43].endpoint) ? 1.1 : 1.01);
         if (hasUpgrade("hn", 31)) gain = gain.pow(1.05);
+        //console.log(gain)
         return gain
     },
-    isEndgame() { return new Decimal("e3.14e16") },
+    isEndgame() { return player.points.gte(new Decimal("e3.14e16")) },
 }
 
 export { tpt }

@@ -1,3 +1,5 @@
+import Decimal from "break_eternity.js"
+
 // ************ Big Feature related ************
 
 export function respecBuyables(layer) {
@@ -86,7 +88,6 @@ export function buyUpg(layer, id) {
 	player[layer].upgrades.push(id);
 	if (upg.onPurchase != undefined)
 		run(upg.onPurchase, upg)
-	needCanvasUpdate = true
 }
 
 export function buyMaxBuyable(layer, id) {
@@ -100,7 +101,7 @@ export function buyMaxBuyable(layer, id) {
 }
 
 export function buyBuyable(layer, id) {
-	if (!player[layer].unlocked) return
+	if (!player[layer]?.unlocked) return
 	if (!tmp[layer].buyables[id].unlocked) return
 	if (!tmp[layer].buyables[id].canBuy) return
 
@@ -148,9 +149,6 @@ export function showTab(name, prev) {
 	var toTreeTab = name == "none"
 	player.tab = name
 	if (tmp[name] && (tmp[name].row !== "side") && (tmp[name].row !== "otherside")) player.lastSafeTab = name
-	updateTabFormats()
-	needCanvasUpdate = true
-	document.activeElement.blur()
 
 }
 
@@ -165,8 +163,6 @@ export function showNavTab(name, prev) {
 	else if (player[name])
 		player[name].prevTab = ""
 	player.navTab = name
-	updateTabFormats()
-	needCanvasUpdate = true
 }
 
 
@@ -193,13 +189,13 @@ export function prestigeNotify(layer) {
 	if (layers[layer].prestigeNotify) return layers[layer].prestigeNotify()
 	
 	if (isPlainObject(tmp[layer].tabFormat)) {
-		for (subtab in tmp[layer].tabFormat){
+		for (let subtab in tmp[layer].tabFormat){
 			if (subtabResetNotify(layer, 'mainTabs', subtab))
 				return true
 		}
 	}
-	for (family in tmp[layer].microtabs) {
-		for (subtab in tmp[layer].microtabs[family]){
+	for (let family in tmp[layer].microtabs) {
+		for (let subtab in tmp[layer].microtabs[family]){
 			if (subtabResetNotify(layer, family, subtab))
 				return true
 		}
@@ -254,23 +250,20 @@ export function toNumber(x) {
 
 export function updateMilestones(layer) {
 	if (tmp[layer].deactivated) return
-	for (id in layers[layer].milestones) {
+	for (let id in layers[layer].milestones) {
 		if (!(hasMilestone(layer, id)) && layers[layer].milestones[id].done()) {
 			player[layer].milestones.push(id)
 			if (layers[layer].milestones[id].onComplete) layers[layer].milestones[id].onComplete()
-			if (tmp[layer].milestonePopups || tmp[layer].milestonePopups === undefined) doPopup("milestone", tmp[layer].milestones[id].requirementDescription, "Milestone Gotten!", 3, tmp[layer].color);
-			player[layer].lastMilestone = id
 		}
 	}
 }
 
 export function updateAchievements(layer) {
 	if (tmp[layer].deactivated) return
-	for (id in layers[layer].achievements) {
+	for (let id in layers[layer].achievements) {
 		if (isPlainObject(layers[layer].achievements[id]) && !(hasAchievement(layer, id)) && layers[layer].achievements[id].done()) {
 			player[layer].achievements.push(id)
 			if (layers[layer].achievements[id].onComplete) layers[layer].achievements[id].onComplete()
-			if (tmp[layer].achievementPopups || tmp[layer].achievementPopups === undefined) doPopup("achievement", tmp[layer].achievements[id].name, "Achievement Gotten!", 3, tmp[layer].color);
 		}
 	}
 }
@@ -350,7 +343,7 @@ export function doPopup(type = "none", text = "This is a test popup.", title = "
 
 //function to reduce time on active popups
 export function adjustPopupTime(diff) {
-	for (popup in activePopups) {
+	for (let popup in activePopups) {
 		activePopups[popup].time -= diff;
 		if (activePopups[popup]["time"] < 0) {
 			activePopups.splice(popup, 1); // Remove popup when time hits 0
@@ -374,4 +367,26 @@ export function gridRun(layer, func, data, id) {
 	}
 	else
 		return layers[layer].grid[func];
+}
+
+export function getImprovements(layer, id) {
+	if (!unl(layer)) return new Decimal(0);
+	return tmp[layer].impr[id].unlocked?(tmp[layer].impr.amount.sub(tmp[layer].impr[id].num).div(tmp[layer].impr.activeRows*tmp[layer].impr.activeCols).plus(1).floor().max(0)):new Decimal(0);
+}
+
+export function getNextImpr(layer, id) {
+	return layers[layer].impr.nextAt(id);
+}
+
+export function improvementEffect(layer, id) {
+	return tmp[layer].impr[id].effect
+}
+
+export function reverse_softcap(a, b) {
+  return b
+}
+
+export function unl(layer) {
+	if (Array.isArray(tmp.ma.canBeMastered)) if (player.ma.selectionActive&&tmp[layer].row<6&&!tmp.ma.canBeMastered.includes(layer)) return false;
+	return player[layer].unlocked;
 }

@@ -1,16 +1,61 @@
 import express from "express"
 import cors from "cors"
 
+import Decimal from "break_eternity.js"
 import { loadMaps } from "./mapsLoader.js"
 import { maps } from "./js/maps.js"
-import { updateTemp } from "./js/technical/temp.js"
+import * as TMTtemp from "./js/technical/temp.js"
 import * as TMTgame from "./js/game.js"
 import * as TMTutils from "./js/utils.js"
 import * as TMTeasyAccess from "./js/utils/easyAccess.js"
+import * as TMTNumberFormating from "./js/utils/NumberFormating.js"
+import * as TMTlayerSupport from "./js/technical/layerSupport.js"
 
 Object.entries(TMTgame).forEach(([k, v]) => global[k] = v)
 Object.entries(TMTutils).forEach(([k, v]) => global[k] = v)
 Object.entries(TMTeasyAccess).forEach(([k, v]) => global[k] = v)
+Object.entries(TMTNumberFormating).forEach(([k, v]) => global[k] = v)
+Object.entries(TMTlayerSupport).forEach(([k, v]) => global[k] = v)
+Object.entries(TMTtemp).forEach(([k, v]) => global[k] = v)
+
+//import clone from "just-clone" //<- need to add decimals to work
+function clone(obj) {
+  if (typeof obj == 'function') {
+    return obj;
+  }
+  var result = Array.isArray(obj) ? [] : {};
+  for (var key in obj) {
+    // include prototype properties
+    var value = obj[key];
+    var type = {}.toString.call(value).slice(8, -1);
+    if (value instanceof Decimal) {
+      result[key] = new Decimal(value)
+    } else if (type == 'Array' || type == 'Object') {
+      result[key] = clone(value);
+    } else if (type == 'Date') {
+      result[key] = new Date(value.getTime());
+    } else if (type == 'RegExp') {
+      result[key] = RegExp(value.source, getRegExpFlags(value));
+    } else {
+      result[key] = value;
+    }
+  }
+  return result;
+}
+
+function getRegExpFlags(regExp) {
+  if (typeof regExp.source.flags == 'string') {
+    return regExp.source.flags;
+  } else {
+    var flags = [];
+    regExp.global && flags.push('g');
+    regExp.ignoreCase && flags.push('i');
+    regExp.multiline && flags.push('m');
+    regExp.sticky && flags.push('y');
+    regExp.unicode && flags.push('u');
+    return flags.join('');
+  }
+}
 
 const app = express()
 const port = 5000
@@ -46,8 +91,8 @@ var beginGame = function (gameID) {
 var loadGameState = function (gameID) {
     console.log(`loading game state for ${gameID}`)
     runningGames[gameID].winners = []
-    runningGames[gameID].funcs = {...loadedMaps[runningGames[gameID].tree].funcs}
-    runningGames[gameID].layers = {...loadedMaps[runningGames[gameID].tree].layers}
+    runningGames[gameID].funcs = clone(loadedMaps[runningGames[gameID].tree].funcs)
+    runningGames[gameID].layers = clone(loadedMaps[runningGames[gameID].tree].layers)
     runningGames[gameID].playersStates = {}
     runningGames[gameID].playersTmps = {}
     runningGames[gameID].getPointGen = loadedMaps[runningGames[gameID].tree].getPointGen
@@ -55,8 +100,8 @@ var loadGameState = function (gameID) {
     runningGames[gameID].canGenPoints = loadedMaps[runningGames[gameID].tree].canGenPoints
     runningGames[gameID].getStartPoints = loadedMaps[runningGames[gameID].tree].getStartPoints
     for (const player of runningGames[gameID].players) {
-        runningGames[gameID].playersStates[player.ip] = structuredClone(loadedMaps[runningGames[gameID].tree].defaultPlayer)
-        runningGames[gameID].playersTmps[player.ip] = structuredClone(loadedMaps[runningGames[gameID].tree].tmp)
+        runningGames[gameID].playersTmps[player.ip] = clone(loadedMaps[runningGames[gameID].tree].tmp)
+        runningGames[gameID].playersStates[player.ip] = clone(loadedMaps[runningGames[gameID].tree].player)
         runningGames[gameID].playersStates[player.ip].points = runningGames[gameID].getStartPoints()
     }
 }
@@ -90,7 +135,7 @@ var playerHostGame = function(playerID, gameInfo) {
         host: playerID,
         hostNick: players[playerID].nick,
         players: [],
-        maxPlayers: gameInfo.maxPlayers,
+        maxPlayers: Math.max(1, gameInfo.maxPlayers),
         tree: gameInfo.tree,
     }
     lastGameID++
@@ -102,7 +147,7 @@ var playerHostGame = function(playerID, gameInfo) {
 var playerGetGameInfo = function(playerID) {
     //console.log(`player ${playerID} requested game info`)
 
-    if (players[playerID].game == undefined) {
+    if (players[playerID]?.game == undefined) {
         return {id: -1}
     } else if (players[playerID].game == -1) {
         return {id: -2}
@@ -138,42 +183,51 @@ var playerDoSomething = function (playerID, what) {
 }
 
 app.get("/games", function(req, res) {
+    var ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress 
     res.send(games)
-    if (players[req.ip] == undefined) players[req.ip] = {}
-    players[req.ip].game = undefined
+    if (players[ip] == undefined) players[ip] = {}
+    players[ip].game = undefined
     //console.log(`list of games sent to ${req.ip}`)
 })
 
 app.get("/gameID", function(req, res) {
-    res.send(players[req.ip].game)
+    var ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress 
+    res.send(players[ip].game)
 })
 
 app.get("/gameInfo", function(req, res) {
-    res.send(playerGetGameInfo(req.ip))
+    var ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress 
+    res.send(playerGetGameInfo(ip))
 })
 
 app.post("/", function(req, res) {
+    var ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress 
     if(req.body.type == SERVERINFO.PLAYERSETNICK) {
-        setPlayerNick(req.ip, req.body.nick)
+        setPlayerNick(ip, req.body.nick)
     } else if (req.body.type == SERVERINFO.PLAYERJOINGAME) {
-        playerJoinGame(req.ip, req.body.gameID)
+        playerJoinGame(ip, req.body.gameID)
     } else if (req.body.type == SERVERINFO.PLAYERHOSTGAME) {
-        playerHostGame(req.ip, req.body)
+        playerHostGame(ip, req.body)
     } else if (req.body.type == SERVERINFO.HOSTKICKPLAYER) {
-        if (req.ip == games[players[req.ip].game].host) {
+        if (ip == games[players[ip]?.game]?.host) {
             hostKickPlayer(req.body.playerID)
         }
     } else if (req.body.type == SERVERINFO.HOSTSTARTGAME) {
-        if (req.ip == games[players[req.ip].game].host)
-            beginGame(players[req.ip].game)
+        if (ip == games[players[ip]?.game]?.host)
+            beginGame(players[ip].game)
     } else if (req.body.type == SERVERINFO.PLAYERDOSOMETHING) {
-        playerDoSomething(req.ip, req.body.what)
+        playerDoSomething(ip, req.body.what)
     }
 }) 
 
 app.listen(port, function() {
    console.log(`Server running on port ${port}`)
 })
+
+global.unl = function (layer) { // <- QUICKFIX
+	if (Array.isArray(tmp.ma.canBeMastered)) if (player.ma.selectionActive&&tmp[layer].row<6&&!tmp.ma.canBeMastered.includes(layer)) return false;
+	return player[layer].unlocked;
+}
 
 var ticking = false
 
@@ -194,7 +248,7 @@ var interval = setInterval(function () {
             global.canGenPoints = runningGames[gameID].canGenPoints
 
             let now = Date.now()
-	        let diff = ((now - player.time) / 1e3) * 10 // <- to not make "idle" game
+	          let diff = ((now - player.time) / 1e3) * 10 // <- to not make "idle" game
             player.time = now
 
             updateTemp()

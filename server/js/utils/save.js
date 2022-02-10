@@ -17,7 +17,7 @@ export function startPlayerBase() {
 		keepGoing: false,
 		hasNaN: false,
 
-		points: new Decimal(0)
+		points: new Decimal(10)
 	};
 }
 export function getStartPlayer() {

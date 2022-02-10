@@ -147,7 +147,7 @@ export function setupLayer(layer){
     if (layers[layer].bars){
         layers[layer].bars.layer = layer
         for (let thing in layers[layer].bars){
-            if (!isPlainObject(layers[layer].bars[thing])) return 
+            if (!isPlainObject(layers[layer].bars[thing])) continue 
             layers[layer].bars[thing].id = thing
             layers[layer].bars[thing].layer = layer
             if (layers[layer].bars[thing].unlocked === undefined)
