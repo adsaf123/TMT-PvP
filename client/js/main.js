@@ -20,6 +20,11 @@ var getGameData = function () {
     fetch(`${SERVERINFO.SERVERIP}/gameInfo`).then(function (response) {
         response.json().then(function (data) {
             currentGameData = data
+            if (currentGameData?.playerID && layersNeededToLoad.length != 0) return 
+            fix(currentGameData?.gameState?.playersStates[currentGameData.playerID], player)
+            fix(currentGameData?.gameState?.playersTmps[currentGameData.playerID], tmp)
+            fix(currentGameData?.gameState?.layers, layers)
+            fix(currentGameData?.gameState?.funcs, funcs)
         })
     })
 } 
