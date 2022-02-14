@@ -1,5 +1,6 @@
 import express from "express"
 import cors from "cors"
+import { Server } from "socket.io"
 
 import Decimal from "break_eternity.js"
 import { loadMaps } from "./mapsLoader.js"
@@ -63,13 +64,49 @@ const port = 5000
 app.use(express.json())
 app.use(cors())
 
+const server = new Server(5000, () => {
+    console.log("server started")
+})
+
+server.on("connection", (socket) => {
+    console.log(`${socket.id} socket connected`)
+    socket.on(SERVERINFO.PLAYERSETNICK, (nick) => {
+        setPlayerNick(socket.id, nick)
+    })
+    socket.on(SERVERINFO.PLAYERJOINGAME, (gameID) => {
+        playerJoinGame(socket.id, gameID)
+    })
+    socket.on(SERVERINFO.HOSTSTARTGAME, (gameInfo) => {
+        playerHostGame(socket.id, gameInfo)
+    })
+    socket.on(SERVERINFO.HOSTKICKPLAYER, (playerID) => {
+        if (isHost(socket.id)) hostKickPlayer(playerID)
+    })
+    socket.on(SERVERINFO.HOSTSTARTGAME, (gameID) => {
+        if (isHost(socket.id)) beginGame(gameID)
+    })
+    socket.on(SERVERINFO.PLAYERDOSOMETHING, (what) => {
+        playerDoSomething(socket.id, what)
+    })
+    socket.on(SERVERINFO.PLAYERGETGAMESLIST, () => {
+        socket.emit(SERVERINFO.SERVERSENDGAMESLIST, games)
+    })
+    socket.on(SERVERINFO.PLAYERGETGAMEINFO, () => {
+        socket.emit(SERVERINFO.SERVERSENDGAMEINFO, playerGetGameInfo(socket.id))
+    })
+})
+
 const SERVERINFO = {
     PLAYERSETNICK: "playerSetNick",
     PLAYERJOINGAME: "playerJoinGame",
     PLAYERHOSTGAME: "playerHostGame",
     HOSTKICKPLAYER: "hostKickPlayer",
     HOSTSTARTGAME: "hostStartGame",
-    PLAYERDOSOMETHING: "playerDoSomething"
+    PLAYERDOSOMETHING: "playerDoSomething",
+    PLAYERGETGAMESLIST: "playerGetGamesList",
+    SERVERSENDGAMESLIST: "serverSendGamesList",
+    PLAYERGETGAMEINFO: "playerGetGameInfo",
+    SERVERSENDGAMEINFO: "serverSendGameInfo",
 }
 
 var runningGames = {}
@@ -79,6 +116,10 @@ var lastGameID = 0
 
 var loadedMaps = loadMaps(maps)
 global.maxRow = 10 // <- quick fix
+
+var isHost = function(playerID, gameID) {
+    return playerID == games[players[playerID]?.game]?.host
+}
 
 var beginGame = function (gameID) {
     console.log(`game ${gameID} started`)
@@ -190,10 +231,6 @@ app.get("/games", function(req, res) {
     //console.log(`list of games sent to ${req.ip}`)
 })
 
-app.get("/gameID", function(req, res) {
-    var ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress 
-    res.send(players[ip].game)
-})
 
 app.get("/gameInfo", function(req, res) {
     var ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress 

@@ -420,8 +420,6 @@ function hardReset(resetOptions) {
 
 var ticking = false
 
-var loading = false
-
 var lateAddLayer = function (layerName, layerData) {
 	layersNeededToLoad.push([layerName, layerData])
 }
@@ -444,7 +442,7 @@ var layersNeededToLoad = []
 
 var interval = setInterval(function () {
 	if (player === undefined || tmp === undefined) return;
-	if (ticking || loading) return;
+	if (ticking) return;
 	if (tmp.gameEnded && !player.keepGoing) return;
 	ticking = true
 
@@ -459,7 +457,7 @@ var interval = setInterval(function () {
 	}
 
 	let now = Date.now()
-	let diff = (now - player.time) / 1e3
+	let diff = ((now - player.time) / 1e3) * 10
 	let trueDiff = diff
 	if (player.offTime !== undefined) {
 		if (player.offTime.remain > modInfo.offlineLimit * 3600) player.offTime.remain = modInfo.offlineLimit * 3600
