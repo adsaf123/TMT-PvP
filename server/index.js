@@ -1,5 +1,3 @@
-import express from "express"
-import cors from "cors"
 import { Server } from "socket.io"
 
 import Decimal from "break_eternity.js"
@@ -57,12 +55,6 @@ function getRegExpFlags(regExp) {
     return flags.join('');
   }
 }
-
-const app = express()
-const port = 5000
-
-app.use(express.json())
-app.use(cors())
 
 const server = new Server(5000, () => {
     console.log("server started")
@@ -222,44 +214,6 @@ var playerDoSomething = function (playerID, what) {
     getTMTfunction(what.name)(what.layer, what.id)
     
 }
-
-app.get("/games", function(req, res) {
-    var ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress 
-    res.send(games)
-    if (players[ip] == undefined) players[ip] = {}
-    players[ip].game = undefined
-    //console.log(`list of games sent to ${req.ip}`)
-})
-
-
-app.get("/gameInfo", function(req, res) {
-    var ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress 
-    res.send(playerGetGameInfo(ip))
-})
-
-app.post("/", function(req, res) {
-    var ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress 
-    if(req.body.type == SERVERINFO.PLAYERSETNICK) {
-        setPlayerNick(ip, req.body.nick)
-    } else if (req.body.type == SERVERINFO.PLAYERJOINGAME) {
-        playerJoinGame(ip, req.body.gameID)
-    } else if (req.body.type == SERVERINFO.PLAYERHOSTGAME) {
-        playerHostGame(ip, req.body)
-    } else if (req.body.type == SERVERINFO.HOSTKICKPLAYER) {
-        if (ip == games[players[ip]?.game]?.host) {
-            hostKickPlayer(req.body.playerID)
-        }
-    } else if (req.body.type == SERVERINFO.HOSTSTARTGAME) {
-        if (ip == games[players[ip]?.game]?.host)
-            beginGame(players[ip].game)
-    } else if (req.body.type == SERVERINFO.PLAYERDOSOMETHING) {
-        playerDoSomething(ip, req.body.what)
-    }
-}) 
-
-app.listen(port, function() {
-   console.log(`Server running on port ${port}`)
-})
 
 global.unl = function (layer) { // <- QUICKFIX
 	if (Array.isArray(tmp.ma.canBeMastered)) if (player.ma.selectionActive&&tmp[layer].row<6&&!tmp.ma.canBeMastered.includes(layer)) return false;

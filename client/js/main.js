@@ -1,4 +1,3 @@
-const socket = io(SERVERINFO.SERVERIP)
 
 const SERVERINFO = {
     SERVERIP: "https://TMTPVPServer.adsaf123.repl.co",
@@ -13,6 +12,9 @@ const SERVERINFO = {
     SERVERSENDGAMEINFO: "serverSendGameInfo",
     PLAYERGETGAMEINFO: "playerGetGameInfo"
 }
+
+const socket = io(SERVERINFO.SERVERIP)
+
 var gamesList = {}
 var currentGame = -1
 var currentGameData = {}
