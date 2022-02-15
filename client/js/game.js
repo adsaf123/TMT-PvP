@@ -1,5 +1,3 @@
-import { setEnvironmentData } from "worker_threads";
-
 var player;
 var needCanvasUpdate = true;
 
