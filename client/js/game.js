@@ -1,3 +1,5 @@
+import { setEnvironmentData } from "worker_threads";
+
 var player;
 var needCanvasUpdate = true;
 
@@ -174,14 +176,11 @@ function generatePoints(layer, diff) {
 }
 
 function doReset(layer, force = false) {
-	sendDataToServer({
-		type: SERVERINFO.PLAYERDOSOMETHING,
-		what: {
-			name: "doReset",
-			layer: layer,
-			id: force
-		}
-	})
+	socket.emit(SERVERINFO.PLAYERDOSOMETHING, {
+		name: "doReset",
+		layer: layer,
+		id: null
+	})	
 
 	if (tmp[layer].type == "none") return
 	let row = tmp[layer].row
@@ -255,13 +254,10 @@ function resetRow(row) {
 }
 
 function startChallenge(layer, x) {
-	sendDataToServer({
-		type: SERVERINFO.PLAYERDOSOMETHING,
-		what: {
-			name: "StartChallenge",
-			layer: layer,
-			id: x
-		}
+	socket.emit(SERVERINFO.PLAYERDOSOMETHING, {
+		name: "StartChallenge",
+		layer: layer,
+		id: x
 	})
 
 	let enter = false
@@ -305,13 +301,10 @@ function canCompleteChallenge(layer, x) {
 }
 
 function completeChallenge(layer, x) {
-	sendDataToServer({
-		type: SERVERINFO.PLAYERDOSOMETHING,
-		what: {
-			name: "completeChallenge",
-			layer: layer,
-			id: x
-		}
+	socket.emit(SERVERINFO.PLAYERDOSOMETHING, {
+		name: "completeChallenge",
+		layer: layer,
+		id: x
 	})
 
 	var x = player[layer].activeChallenge
