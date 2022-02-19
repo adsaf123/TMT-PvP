@@ -156,7 +156,7 @@ addLayer("game-lobby", {
         }
 
         ticksAfterDonwloadingData++
-        if (player.navTab == "tree-tab" && ticksAfterDonwloadingData >= 20) {
+        if (player.navTab == "tree-tab" && ticksAfterDonwloadingData >= 100) {
             getGameData()
             ticksAfterDonwloadingData = 0
         }
@@ -164,7 +164,6 @@ addLayer("game-lobby", {
         if (currentGameData.playerID && player.navTab == "game-lobby")
             loadGame()
 
-        //console.log(layers?.b?.milestones)
         if (currentGameData.playerID && layersNeededToLoad.length == 0) {
             if (player.navTab != "tree-tab") showNavTab("tree-tab")
         }

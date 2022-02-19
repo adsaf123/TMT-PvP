@@ -19,41 +19,41 @@ Object.entries(TMTtemp).forEach(([k, v]) => global[k] = v)
 
 //import clone from "just-clone" //<- need to add decimals to work
 function clone(obj) {
-  if (typeof obj == 'function') {
-    return obj;
-  }
-  var result = Array.isArray(obj) ? [] : {};
-  for (var key in obj) {
-    // include prototype properties
-    var value = obj[key];
-    var type = {}.toString.call(value).slice(8, -1);
-    if (value instanceof Decimal) {
-      result[key] = new Decimal(value)
-    } else if (type == 'Array' || type == 'Object') {
-      result[key] = clone(value);
-    } else if (type == 'Date') {
-      result[key] = new Date(value.getTime());
-    } else if (type == 'RegExp') {
-      result[key] = RegExp(value.source, getRegExpFlags(value));
-    } else {
-      result[key] = value;
+    if (typeof obj == 'function') {
+        return obj;
     }
-  }
-  return result;
+    var result = Array.isArray(obj) ? [] : {};
+    for (var key in obj) {
+        // include prototype properties
+        var value = obj[key];
+        var type = {}.toString.call(value).slice(8, -1);
+        if (value instanceof Decimal) {
+            result[key] = new Decimal(value)
+        } else if (type == 'Array' || type == 'Object') {
+            result[key] = clone(value);
+        } else if (type == 'Date') {
+            result[key] = new Date(value.getTime());
+        } else if (type == 'RegExp') {
+            result[key] = RegExp(value.source, getRegExpFlags(value));
+        } else {
+            result[key] = value;
+        }
+    }
+    return result;
 }
 
 function getRegExpFlags(regExp) {
-  if (typeof regExp.source.flags == 'string') {
-    return regExp.source.flags;
-  } else {
-    var flags = [];
-    regExp.global && flags.push('g');
-    regExp.ignoreCase && flags.push('i');
-    regExp.multiline && flags.push('m');
-    regExp.sticky && flags.push('y');
-    regExp.unicode && flags.push('u');
-    return flags.join('');
-  }
+    if (typeof regExp.source.flags == 'string') {
+        return regExp.source.flags;
+    } else {
+        var flags = [];
+        regExp.global && flags.push('g');
+        regExp.ignoreCase && flags.push('i');
+        regExp.multiline && flags.push('m');
+        regExp.sticky && flags.push('y');
+        regExp.unicode && flags.push('u');
+        return flags.join('');
+    }
 }
 
 const server = new Server(5000, () => {
@@ -109,14 +109,14 @@ var lastGameID = 0
 var loadedMaps = loadMaps(maps)
 global.maxRow = 10 // <- quick fix
 
-var isHost = function(playerID, gameID) {
+var isHost = function (playerID, gameID) {
     return playerID == games[players[playerID]?.game]?.host
 }
 
 var beginGame = function (gameID) {
     console.log(`game ${gameID} started`)
     games[gameID].started = true
-    runningGames[gameID] = {...games[gameID]}
+    runningGames[gameID] = { ...games[gameID] }
     delete games[gameID]
     loadGameState(gameID)
 }
@@ -139,29 +139,29 @@ var loadGameState = function (gameID) {
     }
 }
 
-var setPlayerNick = function(playerID, nick) {
+var setPlayerNick = function (playerID, nick) {
     if (players[playerID] == undefined) {
         players[playerID] = {}
     }
     players[playerID].nick = nick
-    
+
     console.log(playerID + " is now " + nick)
 }
 
-var playerJoinGame = function(playerID, gameID) {
+var playerJoinGame = function (playerID, gameID) {
     if (games[gameID].maxPlayers <= games[gameID].players.length) return
-    games[gameID].players.push({ip: playerID, nick: players[playerID].nick})
+    games[gameID].players.push({ ip: playerID, nick: players[playerID].nick })
     players[playerID].game = gameID
     console.log(playerID + " joins " + gameID)
 }
 
-var hostKickPlayer = function(playerID) {
+var hostKickPlayer = function (playerID) {
     console.log(`player ${playerID} kicked`)
     games[players[playerID].game].players = games[players[playerID].game].players.filter((p) => p.ip != playerID)
     players[playerID].game = -1
 }
 
-var playerHostGame = function(playerID, gameInfo) {
+var playerHostGame = function (playerID, gameInfo) {
     console.log(`player ${playerID} hosts game`)
     var game = {
         started: false,
@@ -177,14 +177,14 @@ var playerHostGame = function(playerID, gameInfo) {
     return lastGameID
 }
 
-var playerGetGameInfo = function(playerID) {
+var playerGetGameInfo = function (playerID) {
     //console.log(`player ${playerID} requested game info`)
 
     if (players[playerID]?.game == undefined) {
-        return {id: -1}
+        return { id: -1 }
     } else if (players[playerID].game == -1) {
-        return {id: -2}
-    } else if (games[players[playerID].game] == undefined){
+        return { id: -2 }
+    } else if (games[players[playerID].game] == undefined) {
         return {
             playerID: playerID,
             gameState: runningGames[players[playerID].game]
@@ -212,18 +212,18 @@ var playerDoSomething = function (playerID, what) {
     global.canGenPoints = runningGames[gameID].canGenPoints
 
     getTMTfunction(what.name)(what.layer, what.id)
-    
+
 }
 
 global.unl = function (layer) { // <- QUICKFIX
-	if (Array.isArray(tmp.ma.canBeMastered)) if (player.ma.selectionActive&&tmp[layer].row<6&&!tmp.ma.canBeMastered.includes(layer)) return false;
-	return player[layer].unlocked;
+    if (Array.isArray(tmp.ma.canBeMastered)) if (player.ma.selectionActive && tmp[layer].row < 6 && !tmp.ma.canBeMastered.includes(layer)) return false;
+    return player[layer].unlocked;
 }
 
 var ticking = false
 
 var interval = setInterval(function () {
-    if (ticking) return 
+    if (ticking) return
     ticking = true
 
     for (const gameID in runningGames) {
@@ -239,7 +239,7 @@ var interval = setInterval(function () {
             global.canGenPoints = runningGames[gameID].canGenPoints
 
             let now = Date.now()
-	          let diff = ((now - player.time) / 1e3) * 10 // <- to not make "idle" game
+            let diff = ((now - player.time) / 1e3) * 10 // <- to not make "idle" game
             player.time = now
 
             updateTemp()
