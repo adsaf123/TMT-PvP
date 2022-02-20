@@ -56,8 +56,11 @@ function getRegExpFlags(regExp) {
     }
 }
 
-const server = new Server(5000, () => {
-    console.log("server started")
+const server = new Server(5000, {
+    cors: {    
+        origin: true, 
+        methods: ["GET", "POST"]  
+    }
 })
 
 server.on("connection", (socket) => {
@@ -68,14 +71,14 @@ server.on("connection", (socket) => {
     socket.on(SERVERINFO.PLAYERJOINGAME, (gameID) => {
         playerJoinGame(socket.id, gameID)
     })
-    socket.on(SERVERINFO.HOSTSTARTGAME, (gameInfo) => {
+    socket.on(SERVERINFO.PLAYERHOSTGAME, (gameInfo) => {
         playerHostGame(socket.id, gameInfo)
     })
     socket.on(SERVERINFO.HOSTKICKPLAYER, (playerID) => {
         if (isHost(socket.id)) hostKickPlayer(playerID)
     })
-    socket.on(SERVERINFO.HOSTSTARTGAME, (gameID) => {
-        if (isHost(socket.id)) beginGame(gameID)
+    socket.on(SERVERINFO.HOSTSTARTGAME, () => {
+        if (isHost(socket.id)) beginGame(players[socket.id].game)
     })
     socket.on(SERVERINFO.PLAYERDOSOMETHING, (what) => {
         playerDoSomething(socket.id, what)
@@ -85,6 +88,12 @@ server.on("connection", (socket) => {
     })
     socket.on(SERVERINFO.PLAYERGETGAMEINFO, () => {
         socket.emit(SERVERINFO.SERVERSENDGAMEINFO, playerGetGameInfo(socket.id))
+    })
+
+    socket.on("disconnect", () => {
+        console.log(`socket ${socket.id} disconnected`)
+        playerLeaveGame(socket.id)
+        
     })
 })
 
@@ -113,6 +122,26 @@ var isHost = function (playerID, gameID) {
     return playerID == games[players[playerID]?.game]?.host
 }
 
+var playerLeaveGame = function (playerID) {
+    let game = playerGetGameInfo(playerID)
+    if (game.id) return //player is not in game
+    if (game.playerID) {
+        game.gameState.players = game.gameState.players.filter(id => id.ip != playerID)
+        if (game.gameState.players.length == 0) {
+            delete runningGames[players[playerID].game]
+            console.log(`running game of player ${playerID} empty, deleting`)
+        }
+        return
+    } 
+    game.players = game.players.filter(id => id.ip != playerID)
+    if (game.players.length == 0) { 
+        delete games[players[playerID].game]
+        console.log(`game of player ${playerID} empty, deleting`)
+    }
+    return 
+    
+}
+
 var beginGame = function (gameID) {
     console.log(`game ${gameID} started`)
     games[gameID].started = true
@@ -128,6 +157,7 @@ var loadGameState = function (gameID) {
     runningGames[gameID].layers = clone(loadedMaps[runningGames[gameID].tree].layers)
     runningGames[gameID].playersStates = {}
     runningGames[gameID].playersTmps = {}
+    runningGames[gameID].stateChangeTree = {}
     runningGames[gameID].getPointGen = loadedMaps[runningGames[gameID].tree].getPointGen
     runningGames[gameID].isEndgame = loadedMaps[runningGames[gameID].tree].isEndgame
     runningGames[gameID].canGenPoints = loadedMaps[runningGames[gameID].tree].canGenPoints
@@ -135,6 +165,7 @@ var loadGameState = function (gameID) {
     for (const player of runningGames[gameID].players) {
         runningGames[gameID].playersTmps[player.ip] = clone(loadedMaps[runningGames[gameID].tree].tmp)
         runningGames[gameID].playersStates[player.ip] = clone(loadedMaps[runningGames[gameID].tree].player)
+        runningGames[gameID].stateChangeTree[player.ip] = { tmp: {}, player: {} }
         runningGames[gameID].playersStates[player.ip].points = runningGames[gameID].getStartPoints()
     }
 }
@@ -187,7 +218,11 @@ var playerGetGameInfo = function (playerID) {
     } else if (games[players[playerID].game] == undefined) {
         return {
             playerID: playerID,
-            gameState: runningGames[players[playerID].game]
+            gameState: {
+                players: runningGames[players[playerID].game].players,
+                playersStates: runningGames[players[playerID].game].stateChangeTree,
+                tree: runningGames[players[playerID].game].tree
+            }
         }
     } else {
         return games[players[playerID].game]
@@ -216,7 +251,6 @@ var playerDoSomething = function (playerID, what) {
 }
 
 global.unl = function (layer) { // <- QUICKFIX
-    if (Array.isArray(tmp.ma.canBeMastered)) if (player.ma.selectionActive && tmp[layer].row < 6 && !tmp.ma.canBeMastered.includes(layer)) return false;
     return player[layer].unlocked;
 }
 
@@ -230,6 +264,7 @@ var interval = setInterval(function () {
         for (const playerID in runningGames[gameID].playersStates) {
             global.player = runningGames[gameID].playersStates[playerID]
             global.tmp = runningGames[gameID].playersTmps[playerID]
+            global.stateChangeTree = { tmp: {}, player: global.player }
             global.temp = tmp
             global.layers = runningGames[gameID].layers
             global.funcs = runningGames[gameID].funcs
@@ -244,6 +279,8 @@ var interval = setInterval(function () {
 
             updateTemp()
             gameLoop(diff)
+
+            runningGames[gameID].stateChangeTree[playerID] = global.stateChangeTree
 
             if (tmp.gameEnded)
                 runningGames[gameID].winners.push(playerID)
