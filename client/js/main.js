@@ -1,6 +1,6 @@
 
 const SERVERINFO = {
-    SERVERIP: "ws://127.0.0.1:5000",
+    SERVERIP: "https://TMTPVPserver.adsaf123.repl.co",
     PLAYERSETNICK: "playerSetNick",
     PLAYERJOINGAME: "playerJoinGame",
     PLAYERHOSTGAME: "playerHostGame",
